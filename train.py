@@ -19,9 +19,9 @@ from curl_sac import RadSacAgent
 from torchvision import transforms
 import data_augs as rad
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    # environment
+
+def add_common_args(parser):
+    """Add arguments needed for both training and testing scripts."""
     parser.add_argument('--domain_name', default='cartpole')
     parser.add_argument('--task_name', default='swingup')
     parser.add_argument('--pre_transform_image_size', default=100, type=int)
@@ -29,14 +29,30 @@ def parse_args():
     parser.add_argument('--image_size', default=84, type=int)
     parser.add_argument('--action_repeat', default=1, type=int)
     parser.add_argument('--frame_stack', default=3, type=int)
+    # train
+    parser.add_argument('--agent', default='rad_sac', type=str)
+    parser.add_argument('--hidden_dim', default=1024, type=int)
+    # encoder
+    parser.add_argument('--encoder_type', default='pixel', type=str)
+    parser.add_argument('--encoder_feature_dim', default=50, type=int)
+    parser.add_argument('--num_layers', default=4, type=int)
+    parser.add_argument('--num_filters', default=32, type=int)
+    parser.add_argument('--latent_dim', default=128, type=int)
+    # misc
+    parser.add_argument('--seed', default=1, type=int)
+    # data augs (need this for train AND test because the 'crop' option
+    # affects input image resolution)
+    parser.add_argument('--data_augs', default='crop', type=str)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
     # replay buffer
     parser.add_argument('--replay_buffer_capacity', default=100000, type=int)
     # train
-    parser.add_argument('--agent', default='rad_sac', type=str)
     parser.add_argument('--init_steps', default=1000, type=int)
     parser.add_argument('--num_train_steps', default=1000000, type=int)
     parser.add_argument('--batch_size', default=32, type=int)
-    parser.add_argument('--hidden_dim', default=1024, type=int)
     # eval
     parser.add_argument('--eval_freq', default=1000, type=int)
     parser.add_argument('--num_eval_episodes', default=10, type=int)
@@ -52,28 +68,20 @@ def parse_args():
     parser.add_argument('--actor_log_std_max', default=2, type=float)
     parser.add_argument('--actor_update_freq', default=2, type=int)
     # encoder
-    parser.add_argument('--encoder_type', default='pixel', type=str)
-    parser.add_argument('--encoder_feature_dim', default=50, type=int)
     parser.add_argument('--encoder_lr', default=1e-3, type=float)
     parser.add_argument('--encoder_tau', default=0.05, type=float)
-    parser.add_argument('--num_layers', default=4, type=int)
-    parser.add_argument('--num_filters', default=32, type=int)
-    parser.add_argument('--latent_dim', default=128, type=int)
     # sac
     parser.add_argument('--discount', default=0.99, type=float)
     parser.add_argument('--init_temperature', default=0.1, type=float)
     parser.add_argument('--alpha_lr', default=1e-4, type=float)
     parser.add_argument('--alpha_beta', default=0.5, type=float)
     # misc
-    parser.add_argument('--seed', default=1, type=int)
     parser.add_argument('--work_dir', default='.', type=str)
     parser.add_argument('--save_tb', default=False, action='store_true')
     parser.add_argument('--save_buffer', default=False, action='store_true')
     parser.add_argument('--save_video', default=False, action='store_true')
     parser.add_argument('--save_model', default=False, action='store_true')
     parser.add_argument('--detach_encoder', default=False, action='store_true')
-    # data augs
-    parser.add_argument('--data_augs', default='crop', type=str)
 
 
     parser.add_argument('--log_interval', default=100, type=int)
@@ -257,7 +265,7 @@ def main():
             L.log('eval/episode', episode, step)
             evaluate(env, agent, video, args.num_eval_episodes, L, step,args)
             if args.save_model:
-                agent.save_curl(model_dir, step)
+                agent.save_all(model_dir, step)
             if args.save_buffer:
                 replay_buffer.save(buffer_dir)
 
@@ -287,7 +295,7 @@ def main():
 
         # run training update
         if step >= args.init_steps:
-            num_updates = 1 
+            num_updates = 1
             for _ in range(num_updates):
                 agent.update(replay_buffer, L, step)
 

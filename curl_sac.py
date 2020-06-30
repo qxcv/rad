@@ -495,6 +495,11 @@ class RadSacAgent(object):
         #    obs_anchor, obs_pos = cpc_kwargs["obs_anchor"], cpc_kwargs["obs_pos"]
         #    self.update_cpc(obs_anchor, obs_pos,cpc_kwargs, L, step)
 
+    def save_all(self, model_dir, step):
+        self.save(model_dir, step)
+        if hasattr(self, 'CURL'):
+            self.save_curl(model_dir, step)
+
     def save(self, model_dir, step):
         torch.save(
             self.actor.state_dict(), '%s/actor_%s.pt' % (model_dir, step)
@@ -515,4 +520,9 @@ class RadSacAgent(object):
         self.critic.load_state_dict(
             torch.load('%s/critic_%s.pt' % (model_dir, step))
         )
- 
+
+    def load_ac(self, actor_path=None, critic_path=None):
+        if actor_path is not None:
+            self.actor.load_state_dict(torch.load(actor_path))
+        if critic_path is not None:
+            self.critic.load_state_dict(torch.load(critic_path))
