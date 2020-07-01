@@ -12,10 +12,10 @@ TRAIN_ARGS="--work_dir $WORK_DIR --num_eval_episodes 10 "\
 "--batch_size 128 --num_train_steps $N_STEPS "\
 "--save_tb --save_model "
 SEED=99
-mkdir "$WORK_DIR"
+mkdir -p "$WORK_DIR"
 CUDA_VISIBLE_DEVICES=0 python train.py \
     --domain_name finger \
     --task_name spin \
     --seed "$SEED" \
-    $(cat test_args_finger.sh) \
-    $TRAIN_ARGS &
+    $(cat scripts/test_args_finger.sh) \
+    $TRAIN_ARGS

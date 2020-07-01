@@ -17,11 +17,11 @@ TRAIN_ARGS="--work_dir $WORK_DIR --num_eval_episodes 10 "\
 "--save_tb --save_model "
 SEED=99
 
-mkdir "$WORK_DIR"
+mkdir -p "$WORK_DIR"
 
-CUDA_VISIBLE_DEVICES=1 python train.py \
+CUDA_VISIBLE_DEVICES=0 python train.py \
     --domain_name cheetah \
     --task_name run \
     --seed "$SEED" \
-    $(cat test_args_cheetah.sh)
+    $(cat scripts/test_args_cheetah.sh) \
     $TRAIN_ARGS

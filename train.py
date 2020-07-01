@@ -47,6 +47,7 @@ def add_common_args(parser):
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    add_common_args(parser)
     # replay buffer
     parser.add_argument('--replay_buffer_capacity', default=100000, type=int)
     # train
