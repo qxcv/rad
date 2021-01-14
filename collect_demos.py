@@ -85,7 +85,8 @@ def sample_traj_stacked(gym_env, agent, frame_stack):
     all_rews = np.stack(all_rews, axis=0)
 
     return TrajectoryWithRew(
-        obs=all_obs, acts=all_acts, infos=all_infos, rews=all_rews)
+        obs=all_obs, acts=all_acts, infos=all_infos,
+        rews=all_rews.astype('float32'))
 
 
 def main():
