@@ -28,6 +28,8 @@ def parse_args():
         "--save-path", default=None, help="path to save demonstrations to")
     parser.add_argument(
         "--ntraj", default=10, type=int, help="number of trajectories to save")
+    parser.add_argument(
+        "--threads", default=None, type=int, help="number of threads for Torch")
     return parser.parse_args()
 
 
@@ -93,10 +95,16 @@ def main():
         raise Exception("you need to provide --viewer xor --save-dir "
                         "arguments for this to do anything useful :)")
 
+    if args.threads is not None:
+        torch.set_num_threads(args.threads)
+
     # TODO: The next few calls are copy-pasted out of train.py. Consider
     # refactoring so that you don't have to copy-paste (otoh not very important
     # since this code only needs to be run once)
-    dev = torch.device('cuda')
+    if torch.cuda.is_available():
+        dev = torch.device('cuda')
+    else:
+        dev = torch.device('cpu')
     pre_transform_image_size = args.pre_transform_image_size if 'crop' \
         in args.data_augs else args.image_size
     env = dmc2gym.make(

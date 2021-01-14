@@ -515,14 +515,18 @@ class RadSacAgent(object):
 
     def load(self, model_dir, step):
         self.actor.load_state_dict(
-            torch.load('%s/actor_%s.pt' % (model_dir, step))
+            torch.load('%s/actor_%s.pt' % (model_dir, step),
+                map_location=self.device)
         )
         self.critic.load_state_dict(
-            torch.load('%s/critic_%s.pt' % (model_dir, step))
+            torch.load('%s/critic_%s.pt' % (model_dir, step),
+                map_location=self.device)
         )
 
     def load_ac(self, actor_path=None, critic_path=None):
         if actor_path is not None:
-            self.actor.load_state_dict(torch.load(actor_path))
+            self.actor.load_state_dict(torch.load(actor_path,
+                map_location=self.device))
         if critic_path is not None:
-            self.critic.load_state_dict(torch.load(critic_path))
+            self.critic.load_state_dict(torch.load(critic_path,
+                map_location=self.device))
